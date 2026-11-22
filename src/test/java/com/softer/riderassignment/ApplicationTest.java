@@ -51,4 +51,17 @@ public class ApplicationTest {
         assertEquals(1, testH2Repository.findAll().size());
     }
 
+    @Test
+    @DisplayName("should get an assignment by id")
+    @Sql(statements = "INSERT INTO rider_assignments(id, delivery_id, rider_id, status, assigned_at) "
+            + "VALUES (1, 7001, 301, 'ASSIGNED', CURRENT_TIMESTAMP)",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM rider_assignments", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testGetAssignmentById() {
+        RiderAssignment response = restTemplate.getForObject(baseUrl + "/1", RiderAssignment.class);
+        assertEquals(7001L, response.getDeliveryId());
+        assertEquals(301L, response.getRiderId());
+    }
+
+
 }
