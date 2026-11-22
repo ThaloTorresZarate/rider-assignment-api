@@ -81,4 +81,20 @@ public class ApplicationTest {
 
         }
 
+    @Test
+    @DisplayName("should update an existing assignment")
+    @Sql(statements = "INSERT INTO rider_assignments(id, delivery_id, rider_id, status, assigned_at) "
+            + "VALUES (1, 7001, 301, 'ASSIGNED', CURRENT_TIMESTAMP)",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM rider_assignments", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testUpdateAssignment() {
+        RiderAssignment request =
+                new RiderAssignment(null, 7001L, 302L, AssignmentStatus.ACCEPTED, null);
+        restTemplate.put(baseUrl + "/1", request);
+        RiderAssignment updated = testH2Repository.findById(1L).get();
+        assertEquals(302L, updated.getRiderId());
+        assertEquals(AssignmentStatus.ACCEPTED, updated.getStatus());
     }
+
+
+}
