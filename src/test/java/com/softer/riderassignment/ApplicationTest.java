@@ -1,11 +1,14 @@
 package com.softer.riderassignment;
 
+import com.softer.riderassignment.model.AssignmentStatus;
 import com.softer.riderassignment.model.RiderAssignment;
 import com.softer.riderassignment.repository.TestH2Repository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -63,5 +67,18 @@ public class ApplicationTest {
         assertEquals(301L, response.getRiderId());
     }
 
+    @Test
+    @DisplayName("should add a new assignment")
+    @Sql(statements = "DELETE FROM rider_assignments", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testAddAssignment() {
+        RiderAssignment request =
+                new RiderAssignment(null, 7001L, 301L, AssignmentStatus.ASSIGNED, null);
+        ResponseEntity<RiderAssignment> response =
+                restTemplate.postForEntity(baseUrl, request, RiderAssignment.class);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody().getId());
+        assertEquals(1, testH2Repository.findAll().size());
 
-}
+        }
+
+    }
