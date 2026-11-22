@@ -96,5 +96,14 @@ public class ApplicationTest {
         assertEquals(AssignmentStatus.ACCEPTED, updated.getStatus());
     }
 
-
+    @Test
+    @DisplayName("should delete an existing assignment")
+    @Sql(statements = "INSERT INTO rider_assignments(id, delivery_id, rider_id, status, assigned_at) "
+            + "VALUES (1, 7001, 301, 'ASSIGNED', CURRENT_TIMESTAMP)",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM rider_assignments", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testDeleteAssignment() {
+        restTemplate.delete(baseUrl + "/1");
+        assertEquals(0, testH2Repository.findAll().size());
+    }
 }
